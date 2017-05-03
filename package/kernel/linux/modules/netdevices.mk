@@ -843,3 +843,31 @@ define KernelPackage/spi-ks8995/description
 endef
 
 $(eval $(call KernelPackage,spi-ks8995))
+
+define KernelPackage/pfe
+  SUBMENU:=$(NETWORK_DEVICES_MENU)
+  TITLE:=Freescale PPFE Driver
+  DEPENDS:=+kmod-ppfe
+  KCONFIG:=CONFIG_FSL_PPFE
+  FILES:=$(LINUX_DIR)/drivers/staging/fsl_ppfe/pfe.ko
+  AUTOLOAD:=$(call AutoProbe,pfe)
+endef
+define KernelPackage/pfe/install
+	$(INSTALL_DIR) $(1)/lib/firmware
+	$(foreach file,ppfe_class_ls1012a.elf ppfe_tmu_ls1012a.elf, \
+		cp $(TOPDIR)/target/linux/$(BOARD)/image/$(file) $(1)/lib/firmware/$(file); \
+	)
+	
+	$(INSTALL_DIR) $(1)/usr
+	cp $(TOPDIR)/target/linux/$(BOARD)/image/httpd.conf $(1)/usr/httpd.conf;
+	cp $(TOPDIR)/target/linux/$(BOARD)/image/index.html $(1)/usr/index.html
+	cp $(TOPDIR)/target/linux/$(BOARD)/image/iot_setup.sh $(1)/usr/iot_setup.sh
+	chmod +x $(1)/usr/iot_setup.sh
+	cp $(TOPDIR)/target/linux/$(BOARD)/image/node-red.tar.gz $(1)/usr/node-red.tar.gz;
+endef
+
+define KernelPackage/ppfe/description
+ Kernel module for PPFE support
+endef
+
+$(eval $(call KernelPackage,pfe))
